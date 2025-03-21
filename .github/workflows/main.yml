@@ -1,0 +1,32 @@
+name: CI-CD
+on: 
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+  
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtendo o código
+        uses: actions/checkout@v4.2.2
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: echo "Executar o Docker Build"
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src
+          push: true
+          file: ./src/Dockerfile
+          tags: digorech/fake-shop-challenge:v${{ github.run_number }}
+  
+  CD:
+    needs: [CI]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Obter código"
+      - run: echo "Configurar o kubeconfig"
