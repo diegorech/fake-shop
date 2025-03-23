@@ -1,5 +1,5 @@
 # Fake Shop
-
+Como não era minha primeira conta tive que apagar o cluster kubernetes
 
 ## Variável de Ambiente
 DB_HOST	=> Host do banco de dados PostgreSQL.
