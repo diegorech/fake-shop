@@ -1,9 +1,9 @@
 name: CI-CD
-on: 
+on:
   push:
     branches: ["main"]
   workflow_dispatch:
-  
+
 jobs:
   CI:
     runs-on: ubuntu-latest
@@ -22,11 +22,24 @@ jobs:
           context: ./src
           push: true
           file: ./src/Dockerfile
-          tags: digorech/fake-shop-challenge:v${{ github.run_number }}
-  
+          tags: |
+            digorech/fake-shop-challenge:v${{ github.run_number }}
+            digorech/fake-shop-challenge
+
   CD:
     needs: [CI]
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Obter código"
-      - run: echo "Configurar o kubeconfig"
+      - name: Obtendo o código
+        uses: actions/checkout@v4.2.2
+
+      - uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - uses: Azure/k8s-deploy@v5
+        with:
+            manifests: |
+              k8s/deployment.yaml
+            images: digorech/fake-shop-challenge:v${{ github.run_number }}
